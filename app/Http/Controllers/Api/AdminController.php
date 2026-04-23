@@ -21,14 +21,43 @@ class AdminController extends Controller
 
     public function stats()
     {
+        // Inscriptions par mois (12 derniers mois)
+        $inscriptionsParMois = Inscription::selectRaw('MONTH(created_at) as mois, YEAR(created_at) as annee, COUNT(*) as total, SUM(montant_paye) as revenus')
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->groupBy('annee', 'mois')
+            ->orderBy('annee')->orderBy('mois')
+            ->get();
+
+        // Répartition par abonnement
+        $repartitionAbos = Inscription::selectRaw('abonnement_id, COUNT(*) as total')
+            ->where('statut', 'active')
+            ->with('abonnement:id,nom')
+            ->groupBy('abonnement_id')
+            ->get()
+            ->map(fn($i) => [
+                'nom'   => $i->abonnement?->nom ?? 'Inconnu',
+                'total' => $i->total,
+            ]);
+
+        // Nouveaux membres par mois
+        $membresParMois = User::selectRaw('MONTH(created_at) as mois, YEAR(created_at) as annee, COUNT(*) as total')
+            ->where('role', 'membre')
+            ->where('created_at', '>=', now()->subMonths(12))
+            ->groupBy('annee', 'mois')
+            ->orderBy('annee')->orderBy('mois')
+            ->get();
+
         return response()->json([
-            'users'        => User::where('role', 'membre')->count(),
-            'coaches'      => Coach::where('active', true)->count(),
-            'cours'        => Cours::where('actif', true)->count(),
-            'inscriptions' => Inscription::where('statut', 'active')->count(),
-            'salles'       => Salle::where('active', true)->count(),
-            'abonnements'  => Abonnement::where('actif', true)->count(),
-            'revenus'      => Inscription::where('statut', 'active')->sum('montant_paye'),
+            'users'               => User::where('role', 'membre')->count(),
+            'coaches'             => Coach::where('active', true)->count(),
+            'cours'               => Cours::where('actif', true)->count(),
+            'inscriptions'        => Inscription::where('statut', 'active')->count(),
+            'salles'              => Salle::where('active', true)->count(),
+            'abonnements'         => Abonnement::where('actif', true)->count(),
+            'revenus'             => Inscription::where('statut', 'active')->sum('montant_paye'),
+            'inscriptions_mois'   => $inscriptionsParMois,
+            'repartition_abos'    => $repartitionAbos,
+            'membres_mois'        => $membresParMois,
         ]);
     }
 
