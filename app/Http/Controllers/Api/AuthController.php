@@ -80,4 +80,36 @@ class AuthController extends Controller
         $user = $request->user()->load('inscriptionActive.abonnement');
         return response()->json($user);
     }
+
+    /** PUT /api/profil */
+    public function updateProfil(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'prenom'    => 'sometimes|string|max:100',
+            'name'      => 'sometimes|string|max:100',
+            'email'     => 'sometimes|email|unique:users,email,' . $user->id,
+            'telephone' => 'sometimes|nullable|string|max:20',
+            'current_password'      => 'required_with:password',
+            'password'              => 'sometimes|min:8|confirmed',
+            'password_confirmation' => 'sometimes',
+        ]);
+
+        if (isset($data['current_password'])) {
+            if (!\Hash::check($data['current_password'], $user->password)) {
+                return response()->json(['message' => 'Mot de passe actuel incorrect.'], 422);
+            }
+            $user->password = \Hash::make($data['password']);
+        }
+
+        if (isset($data['prenom']))    $user->prenom    = $data['prenom'];
+        if (isset($data['name']))      $user->name      = $data['name'];
+        if (isset($data['email']))     $user->email     = $data['email'];
+        if (isset($data['telephone'])) $user->telephone = $data['telephone'];
+
+        $user->save();
+
+        return response()->json($user);
+    }
 }

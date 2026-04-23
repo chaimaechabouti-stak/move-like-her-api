@@ -51,6 +51,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/reservations/{coursId}',  [ReservationController::class, 'annuler']);
     Route::get('/mes-reservations',           [ReservationController::class, 'mesReservations']);
 
+    // ── Profil ──
+    Route::put('/profil', [AuthController::class, 'updateProfil']);
+
     // ── Admin (role=admin) ────────────────────────────
     Route::middleware('App\Http\Middleware\AdminMiddleware')->prefix('admin')->group(function () {
 
