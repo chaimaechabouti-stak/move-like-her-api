@@ -413,10 +413,73 @@ class AdminController extends Controller
     public function updateDemande(Request $request, $id)
     {
         $demande = Demande::findOrFail($id);
+        $ancienStatut = $demande->statut;
+
         $data = $request->validate([
             'statut' => 'required|in:nouveau,contacte,inscrit,annule',
         ]);
         $demande->update($data);
+
+        // Quand l'admin marque "inscrit" → créer user + inscription automatiquement
+        if ($data['statut'] === 'inscrit' && $ancienStatut !== 'inscrit') {
+
+            // Créer ou récupérer l'utilisateur
+            $user = User::firstOrCreate(
+                ['email' => $demande->email],
+                [
+                    'name'     => trim(($demande->prenom ?? '') . ' ' . ($demande->name ?? '')),
+                    'password' => Hash::make(Str::random(12)),
+                    'role'     => 'membre',
+                ]
+            );
+
+            // Trouver l'abonnement correspondant à la formule
+            $formuleMap = [
+                'decouverte'   => 'decouverte',
+                'mensuel'      => 'mensuel',
+                'trimestriel'  => 'trimestriel',
+                'annuel'       => 'annuel',
+                'coaching'     => 'coaching',
+            ];
+            $slug = $formuleMap[$demande->formule] ?? null;
+            $abonnement = $slug ? Abonnement::where('slug', $slug)->first() : null;
+
+            // Montant selon formule
+            $montantMap = [
+                'decouverte'  => 0,
+                'mensuel'     => 500,
+                'trimestriel' => 1300,
+                'annuel'      => 4500,
+                'coaching'    => 800,
+            ];
+            $montant = $montantMap[$demande->formule] ?? 0;
+
+            // Créer l'inscription si elle n'existe pas déjà
+            $dejaInscrit = Inscription::where('user_id', $user->id)
+                ->where('statut', 'active')
+                ->exists();
+
+            if (!$dejaInscrit) {
+                Inscription::create([
+                    'user_id'       => $user->id,
+                    'abonnement_id' => $abonnement?->id,
+                    'salle_id'      => null,
+                    'frequence'     => 'mensuel',
+                    'montant_paye'  => $montant,
+                    'statut'        => 'active',
+                    'date_debut'    => now(),
+                    'date_fin'      => now()->addMonth(),
+                    'notes'         => 'Créée via demande d\'inscription — ville: ' . ($demande->ville ?? ''),
+                ]);
+            }
+
+            return response()->json([
+                ...$demande->toArray(),
+                'user_cree' => !$user->wasRecentlyCreated ? false : true,
+                'user_id'   => $user->id,
+            ]);
+        }
+
         return response()->json($demande);
     }
 
