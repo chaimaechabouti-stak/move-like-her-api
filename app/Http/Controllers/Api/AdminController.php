@@ -7,6 +7,7 @@ use App\Models\Abonnement;
 use App\Models\Coach;
 use App\Models\Contact;
 use App\Models\Cours;
+use App\Models\Demande;
 use App\Models\Inscription;
 use App\Models\Salle;
 use App\Models\User;
@@ -399,6 +400,29 @@ class AdminController extends Controller
     public function deleteContact($id)
     {
         Contact::findOrFail($id)->delete();
+        return response()->json(['message' => 'Supprimé']);
+    }
+
+    public function demandes()
+    {
+        return response()->json(
+            Demande::orderByDesc('created_at')->get()
+        );
+    }
+
+    public function updateDemande(Request $request, $id)
+    {
+        $demande = Demande::findOrFail($id);
+        $data = $request->validate([
+            'statut' => 'required|in:nouveau,contacte,inscrit,annule',
+        ]);
+        $demande->update($data);
+        return response()->json($demande);
+    }
+
+    public function deleteDemande($id)
+    {
+        Demande::findOrFail($id)->delete();
         return response()->json(['message' => 'Supprimé']);
     }
 }

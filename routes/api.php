@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CoachController;
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\DemandeController;
 use App\Http\Controllers\Api\CoursController;
 use App\Http\Controllers\Api\SalleController;
 use App\Http\Controllers\Api\ReservationController;
@@ -30,6 +31,7 @@ Route::get('/coaches',       [CoachController::class, 'index']);
 Route::get('/coaches/{id}',  [CoachController::class, 'show']);
 
 Route::post('/contact',      [ContactController::class, 'store']);
+Route::post('/demandes',     [DemandeController::class, 'store']);
 
 // ── Stripe webhook (pas d'auth — Stripe appelle directement) ──
 Route::post('/stripe/webhook', [StripeController::class, 'webhook']);
@@ -97,5 +99,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/contacts',             [AdminController::class, 'contacts']);
         Route::put('/contacts/{id}',        [AdminController::class, 'updateContact']);
         Route::delete('/contacts/{id}',     [AdminController::class, 'deleteContact']);
+
+        // Demandes d'inscription
+        Route::get('/demandes',             [AdminController::class, 'demandes']);
+        Route::put('/demandes/{id}',        [AdminController::class, 'updateDemande']);
+        Route::delete('/demandes/{id}',     [AdminController::class, 'deleteDemande']);
     });
 });
