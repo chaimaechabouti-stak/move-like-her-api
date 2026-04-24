@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Abonnement;
 use App\Models\Coach;
+use App\Models\Contact;
 use App\Models\Cours;
 use App\Models\Inscription;
 use App\Models\Salle;
@@ -376,5 +377,28 @@ class AdminController extends Controller
         }
 
         return response()->json($query->paginate(20));
+    }
+
+    public function contacts()
+    {
+        return response()->json(
+            Contact::orderByDesc('created_at')->get()
+        );
+    }
+
+    public function updateContact(Request $request, $id)
+    {
+        $contact = Contact::findOrFail($id);
+        $data = $request->validate([
+            'statut' => 'required|in:nouveau,lu,traite',
+        ]);
+        $contact->update($data);
+        return response()->json($contact);
+    }
+
+    public function deleteContact($id)
+    {
+        Contact::findOrFail($id)->delete();
+        return response()->json(['message' => 'Supprimé']);
     }
 }

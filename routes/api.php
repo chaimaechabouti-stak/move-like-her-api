@@ -92,5 +92,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Inscriptions
         Route::get('/inscriptions',         [AdminController::class, 'inscriptions']);
+
+        // Contacts
+        Route::get('/contacts',             [AdminController::class, 'contacts']);
+        Route::put('/contacts/{id}',        [AdminController::class, 'updateContact']);
+        Route::delete('/contacts/{id}',     [AdminController::class, 'deleteContact']);
     });
 });
