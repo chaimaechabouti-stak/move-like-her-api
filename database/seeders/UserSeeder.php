@@ -27,6 +27,9 @@ class UserSeeder extends Seeder
             ['name' => 'Benali',   'prenom' => 'Khadija', 'email' => 'khadija.benali@movelikeher.ma'],
             ['name' => 'El Fassi', 'prenom' => 'Nadia',   'email' => 'nadia.elfassi@movelikeher.ma'],
             ['name' => 'Tahiri',   'prenom' => 'Yasmine', 'email' => 'yasmine.tahiri@movelikeher.ma'],
+            ['name' => 'Mansouri', 'prenom' => 'Imane',   'email' => 'imane.mansouri@movelikeher.ma'],
+            ['name' => 'Chraibi',  'prenom' => 'Rania',   'email' => 'rania.chraibi@movelikeher.ma'],
+            ['name' => 'Idrissi',  'prenom' => 'Salma',   'email' => 'salma.idrissi@movelikeher.ma'],
         ];
 
         foreach ($coaches as $coach) {

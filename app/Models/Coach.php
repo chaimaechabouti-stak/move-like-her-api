@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Coach extends Model
 {
     protected $fillable = [
-        'user_id', 'salle_id', 'specialite',
+        'user_id', 'salle_id', 'ville', 'specialite',
         'photo_url', 'bio', 'certifications',
         'cours_dispenses', 'experience_annees', 'active',
     ];
