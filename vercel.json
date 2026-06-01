@@ -8,6 +8,5 @@
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/lambda.php" }
-  ],
-  "buildCommand": "true"
+  ]
 }
